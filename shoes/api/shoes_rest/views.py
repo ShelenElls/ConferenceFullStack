@@ -4,8 +4,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 import json
 
-from shoes.api.shoes_rest.models import Shoe
-from wardrobe.api.wardrobe_api.views import BinEncoder
+from .models import BinVO, Shoe
+
 
 # Create your views here.
 #views in wardrobe had a bin encoder with properties from model 
@@ -15,30 +15,66 @@ from wardrobe.api.wardrobe_api.views import BinEncoder
 # manufacturer model name, color, and get extra data? for the bin in 
 # wardrobe 
 
+class BinVODetailEncoder(ModelEncoder):
+    model = BinVO
+    properties = ["closet_name", "import_href", "bin_number", "bin_size"]
+
+
+
 class ShoeEncoder(ModelEncoder):
     model = Shoe
     properties = [
         "id",
         "manufacturer",
+        "model_name",
         "color",
         "picture_url", 
-        "bin",
     ]
     encoders = {
-        "bin": BinEncoder(),
+        "bin": BinVODetailEncoder(),
     }
 
 #get returns a diction with a single key, shoes which has a list of 
 # the manufacturer, color, picture_url, and bin for where its locationed, 
 # as well as its assigned ID
 
-@require_http_methods(["GET"])
+@require_http_methods(["GET", "POST"])
 def api_shoes(request):
     if request.method == "GET":
-        shoes = Shoe.objects.all()
+        shoe = Shoe.objects.all()
         return JsonResponse(
-            {"shoes": shoes},
-            encoder=BinEncoder,
+            shoe,
+            encoder=ShoeEncoder,
+            safe=False,
         )
     else:
-        pass
+        content = json.loads(request.body)
+        try:
+            href = content["bin"]
+            bin = BinVO.objects.get(import_href=href)
+            content["bin"] = bin
+        except BinVO.DoesNotExist:
+            return JsonResponse(
+                {"message": "Invalid bin id"},
+                status=400,
+            )
+        shoes = Shoe.objects.create(**content)
+        return JsonResponse(
+            shoes,
+            encoder=ShoeEncoder,
+            safe=False, 
+        )
+
+@require_http_methods(["DELETE"])
+def api_delete_shoe(request, pk):
+    try:
+        shoe = Shoe.objects.get(id=pk)
+        shoe.delete()
+        return JsonResponse(
+            shoe,
+            encoder=ShoeEncoder,
+            safe=False,
+        )
+    except Shoe.DoesNotExist:
+        return JsonResponse({"message": "Does not exist"})
+   

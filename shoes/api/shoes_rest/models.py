@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # Create your models here.
 # make a class in shoes that keeps track of? manufacturer, 
 #model name, color, url for a picture ? maybe views. 
@@ -8,9 +9,10 @@ from django.db import models
 #wardrobe has a class model named bin- that has the parameters
 #closet_name; bin_number; and bin_size
 class BinVO(models.Model):
-    closet_name = models.CharField(max_length=150)
+    closet_name = models.CharField(max_length=100)
+    bin_number = models.PositiveSmallIntegerField()
+    bin_size = models.PositiveSmallIntegerField()
     import_href = models.CharField(max_length=200, unique=True)
-
 
 class Shoe(models.Model):
     manufacturer = models.CharField(max_length=150)
@@ -20,6 +22,6 @@ class Shoe(models.Model):
     bin = models.ForeignKey(
         BinVO, related_name="shoes", on_delete=models.CASCADE,
     )
-#going to need to research the foreignkey relationship for BIN to shoe
+
 
 
