@@ -66,15 +66,8 @@ def api_shoes(request):
         )
 
 @require_http_methods(["DELETE"])
-def api_delete_shoe(request, pk):
-    try:
-        shoe = Shoe.objects.get(id=pk)
-        shoe.delete()
-        return JsonResponse(
-            shoe,
-            encoder=ShoeEncoder,
-            safe=False,
-        )
-    except Shoe.DoesNotExist:
-        return JsonResponse({"message": "Does not exist"})
+def api_shoe(request, pk):
+    if request.method == "DELETE":
+        count, _ = Shoe.objects.filter(id=pk).delete()
+        return JsonResponse({"deleted": count > 0})
    
