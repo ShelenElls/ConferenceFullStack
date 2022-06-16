@@ -31,7 +31,7 @@ class ShoeEncoder(ModelEncoder):
         "picture_url", 
     ]
     encoders = {
-        "bin": BinVODetailEncoder(),
+        "bins": BinVODetailEncoder(),
     }
 
 #get returns a diction with a single key, shoes which has a list of 
@@ -50,9 +50,9 @@ def api_shoes(request):
     else:
         content = json.loads(request.body)
         try:
-            href = content["bin"]
+            href = content["bins"]
             bin = BinVO.objects.get(import_href=href)
-            content["bin"] = bin
+            content["bins"] = bin
         except BinVO.DoesNotExist:
             return JsonResponse(
                 {"message": "Invalid bin id"},
