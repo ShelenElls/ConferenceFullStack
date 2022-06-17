@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from .models import Hats, LocationVO
 # Create your views here.
 
-class LocationVODetailEncoder:
+class LocationVOEncoder(ModelEncoder):
     model = LocationVO
     properties = [
         "closet_name", 
@@ -22,13 +22,27 @@ class HatEncoder(ModelEncoder):
         "fabric", 
         "style_name", 
         "color", 
-        "pictureurl", 
+        "pictureurl",
+        "location",
+        "id",
+    ]
+    encoders = {
+        "location": LocationVOEncoder(),
+    }
+
+
+class HatDetailEncoder(ModelEncoder):
+    model = Hats
+    properties = [
+        "fabric",
+        "style_name",
+        "color",
+        "pictureurl",
         "location",
     ]
-
-    def get_extra_data(self, o):
-        return LocationVO()
-
+    encoders = {
+        "location": LocationVOEncoder(),
+    }
 
 
 # get and post dont require unique id, 
@@ -40,31 +54,32 @@ def api_list_hats(request):
     if request.method == "GET":
         hats = Hats.objects.all()
         return JsonResponse(
-            {"hats": hats},
+            hats,
             encoder=HatEncoder,
             safe=False,
         )
     else:
         content = json.loads(request.body)
         #try & except block
+        try:
+            href = content["location"]
+            location = LocationVO.objects.get(import_href=href)
+            content["location"] = location
+        except LocationVO.DoesNotExist:
+            return JsonResponse(
+                {"message": "Invalid Location id"}, 
+                status=400,
+            )
         hat = Hats.objects.create(**content)
         return JsonResponse(
             hat,
-            encoder=HatEncoder,
+            encoder=HatDetailEncoder,
             safe=False,
         )
 
 @require_http_methods(["DELETE"])
 def api_delete_hats(request, pk):
     if request.method == "DELETE":
-        try:
-            hat = Hats.objects.get(id=pk)
-            hat.delete()
-            return JsonResponse(
-                hat,
-                encoder=HatEncoder,
-                safe=False,
-            )
-        except Hats.DoesNotExist:
-            return JsonResponse({"message": "Does not exist"})
+        count, _ = Hats.objects.filter(id=pk).delete()
+        return JsonResponse({"deleted": count > 0})
 
