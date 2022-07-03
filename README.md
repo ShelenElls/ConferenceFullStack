@@ -8,6 +8,7 @@ Team:
 ## Design
 
 Designed with a Python, Javascript, Django, and React. 
+This project utilizes Docker for deployment. 
 
 ## Shoes microservice
 
