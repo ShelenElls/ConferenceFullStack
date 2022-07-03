@@ -3,6 +3,7 @@ from django.urls import NoReverseMatch
 from django.db.models import QuerySet
 from datetime import datetime
 
+# date encoder returns an iso formatted date in a string
 
 class DateEncoder(JSONEncoder):
     def default(self, o):
@@ -11,6 +12,7 @@ class DateEncoder(JSONEncoder):
         else:
             return super().default(o)
 
+# not too sure what query set encoder does
 
 class QuerySetEncoder(JSONEncoder):
     def default(self, o):
@@ -19,6 +21,7 @@ class QuerySetEncoder(JSONEncoder):
         else:
             return super().default(o)
 
+# model encoder encodes (again i forgot)
 
 class ModelEncoder(DateEncoder, QuerySetEncoder, JSONEncoder):
     encoders = {}
