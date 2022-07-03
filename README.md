@@ -7,10 +7,13 @@ Team:
 
 ## Design
 
+Designed with a Python, Javascript, Django, and React. 
+
 ## Shoes microservice
 
-Explain your models and integration with the wardrobe
-microservice, here.
+The main model for the Shoes microservice is the Shoe. The shoes microservices utilizes a poller and a value object to pull data from the wardrobe to determine things like location numbers and the size, etc. 
+
+
 
 ## Hats microservice
 
